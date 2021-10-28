@@ -30,11 +30,10 @@ jobs:
         cache: 'npm'
     - name: backup
       run: | 
-      
+        git pull
         npm install yarn
         yarn install
         node app.js -u swhan9404 -a $(expr $(date '+%Y-%m-%d')) -d 200 > ./logs/$(expr $(date '+%Y-%m-%d')).txt
-        git pull
         git add .
         git commit -m "$(expr $(date '+%Y-%m-%d')) backup"
         git config --local user.email "swhan9404@naver.com"
