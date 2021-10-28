@@ -40,9 +40,6 @@ class Crawler {
       await this.writePost(post);
       console.log(`✅ " ${post.title} " 백업 완료`);
     });
-
-  await new Promise(r => setTimeout(r, this.delay * posts.length));
-  await console.log("작업 종료")
   }
 
   async getPosts() {

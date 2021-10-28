@@ -35,10 +35,9 @@ jobs:
         yarn install
         node app.js -u swhan9404 -a $(expr $(date '+%Y-%m-%d')) -d 200
         git add .
-        git commit -m "$(expr $(date '+%Y-%m-%d')) backup"
         git config --local user.email "swhan9404@naver.com"
         git config --local user.name "swhan9404"
-        git commit -m "Update README.md"
+        git commit -m "$(expr $(date '+%Y-%m-%d')) backup"
         git push
 
 
