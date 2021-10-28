@@ -34,7 +34,7 @@ jobs:
         npm install yarn
         yarn install
         touch ./logs/$(expr $(date '+%Y-%m-%d')).txt
-        node app.js -u swhan9404 -a $(expr $(date '+%Y-%m-%d')) -d 200 > ./logs/$(expr $(date '+%Y-%m-%d')).txt
+        node app.js -u swhan9404 -a $(expr $(date '+%Y-%m-%d')) -d 200
         git add .
         git commit -m "$(expr $(date '+%Y-%m-%d')) backup"
         git config --local user.email "swhan9404@naver.com"
