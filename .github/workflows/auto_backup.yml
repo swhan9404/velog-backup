@@ -1,0 +1,46 @@
+# This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: auto_backup
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: "0 0 */3 * *"
+
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.17.6]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - name: backup
+      run: | 
+      
+        npm install yarn
+        yarn install
+        node app.js -u swhan9404 -a $(expr $(date '+%Y-%m-%d')) -d 200 > ./logs/$(expr $(date '+%Y-%m-%d')).txt
+        git pull
+        git add .
+        git commit -m "$(expr $(date '+%Y-%m-%d')) backup"
+        git config --local user.email "swhan9404@naver.com"
+        git config --local user.name "swhan9404"
+        git commit -m "Update README.md"
+        git push
+
+
+         
