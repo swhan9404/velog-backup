@@ -18,6 +18,7 @@ program.parse(process.argv);
 !fs.existsSync(`./backup/${program.day}`) && fs.mkdirSync(`./backup/${program.day}`);
 !fs.existsSync(`./backup/${program.day}/content`) && fs.mkdirSync(`./backup/${program.day}/content`);
 !fs.existsSync(`./backup/${program.day}/images`) && fs.mkdirSync(`./backup/${program.day}/images`);
+!fs.existsSync(`./logs`)
 
 const crawler = new Crawler(program.username, { 
   delay: program.delay || 0,
