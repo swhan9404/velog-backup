@@ -5,17 +5,18 @@ const { join } = require('path');
 const { PostsQuery, PostQuery } = require('./query');
 
 class Crawler {
-  constructor(username, { delay, cert }) {
+  constructor(username, { delay, cert, day }) {
     this.username = username; 
 
     if (!username) {
-      console.error('❌ 유저이름을 입력해주세요')
+      console.log('❌ 유저이름을 입력해주세요')
       process.exit(1);
     }
 
     // options
     this.delay = delay;
     this.cert = cert;
+    this.day = day;
 
     this.__grahpqlURL = 'https://v2.velog.io/graphql';
     this.__api = axios.create({
@@ -23,12 +24,14 @@ class Crawler {
         Cookie: cert ? `access_token=${cert};` : null,
       }, 
     });
+
+    this.log = ""
   }
 
   async parse() {
     const posts = await this.getPosts();
     
-    posts.map(async(postInfo, i) => { 
+    posts.map(async(postInfo, i) => {
       if (this.delay > 0) await new Promise(r => setTimeout(r, this.delay * i));
 
       let post = await this.getPost(postInfo.url_slug);
@@ -37,6 +40,9 @@ class Crawler {
       await this.writePost(post);
       console.log(`✅ " ${post.title} " 백업 완료`);
     });
+
+  await new Promise(r => setTimeout(r, this.delay * posts.length));
+  await console.log("작업 종료")
   }
 
   async getPosts() {
@@ -48,7 +54,7 @@ class Crawler {
       await this.__api.get(url);
     } catch (e) {
       if (e.response.status === 404) {
-        console.error(`⚠️  해당 유저를 찾을 수 없어요 \n username = ${this.username}`);
+        console.log(`⚠️  해당 유저를 찾을 수 없어요 \n username = ${this.username}`);
         process.exit(1);
       }
 
@@ -63,7 +69,7 @@ class Crawler {
           response = await this.__api.post(this.__grahpqlURL, PostsQuery(this.username));
         }
       } catch(e) {
-        console.error(`⚠️  벨로그에서 글 목록을 가져오는데 실패했습니다. \n error = ${e}`);
+        console.log(`⚠️  벨로그에서 글 목록을 가져오는데 실패했습니다. \n error = ${e}`);
         process.exit(1);
       }
       
@@ -82,7 +88,7 @@ class Crawler {
     try {
       response = await this.__api.post(this.__grahpqlURL, PostQuery(this.username, url_slug));
     } catch (e) {
-      console.error(`⚠️  벨로그에서 글을 가져오는데 실패했습니다. \n error = ${e} url = ${url_slug}`);
+      console.log(`⚠️  벨로그에서 글을 가져오는데 실패했습니다. \n error = ${e} url = ${url_slug}`);
       process.exit(1);
     }
     
@@ -97,8 +103,8 @@ class Crawler {
       const re = new RegExp(char, 'g');
       title = title.replace(re, '');
     }
-
-    const path = join('backup', 'content', `${title}.md`);
+    const path_middle = this.day ? String(this.day)+'/content' : 'content'
+    const path = join('backup', path_middle, `${title}.md`);
 
     post.body = '---\n'
                 + `title: "${post.title}"\n`
@@ -110,6 +116,10 @@ class Crawler {
     await fs.promises.writeFile(path, post.body, 'utf8');
   }
 
+  async writeLog(log) {
+
+  }
+
   async getImage(body) {
     const regex = /!\[[^\]]*\]\((.*?.png|.jpeg|.jpg|.webp|.svg|.gif|.tiff)\s*("(?:.*[^"])")?\s*\)|!\[[^\]]*\]\((.*?)\s*("(?:.*[^"])")?\s*\)/g;
     
@@ -117,7 +127,8 @@ class Crawler {
       if (!url) return;
 
       const filename = url.replace(/\/\s*$/,'').split('/').slice(-2).join('-').trim();
-      const path = join('backup', 'images', decodeURI(filename));
+      const path_middle = this.day ? String(this.day)+'/images' : 'images'
+      const path = join('backup', path_middle, decodeURI(filename));
       
       this.__api({
         method: 'get',
@@ -125,9 +136,9 @@ class Crawler {
         responseType: 'stream',
       })
       .then(resp => resp.data.pipe(fs.createWriteStream(path)))
-      .catch(e => console.error(`⚠️ 이미지를 다운 받는데 오류가 발생했습니다 / url = ${url} , e = ${e}`));
+      .catch(e => console.log(`⚠️ 이미지를 다운 받는데 오류가 발생했습니다 / url = ${url} , e = ${e}`));
 
-      return `![](/images/${filename})`;
+      return `![](../images/${filename})`;
     });
 
     return body;
