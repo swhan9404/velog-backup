@@ -31,6 +31,8 @@ jobs:
     - name: backup
       run: | 
         git pull
+        git branch $(expr $(date '+%Y-%m-%d'))
+        git checkout $(expr $(date '+%Y-%m-%d'))
         npm install yarn
         yarn install
         node app.js -u swhan9404 -a $(expr $(date '+%Y-%m-%d')) -d 200
@@ -38,7 +40,7 @@ jobs:
         git config --local user.email "swhan9404@naver.com"
         git config --local user.name "bot"
         git commit -m "$(expr $(date '+%Y-%m-%d')) backup"
-        git push
+        git push origin $(expr $(date '+%Y-%m-%d'))
 
 
          
