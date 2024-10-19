@@ -19,6 +19,6 @@
   "dependencies": {
     "axios": "^0.21.1",
     "commander": "^5.1.0",
-    "yarn": "^1.22.17"
+    "yarn": "^1.22.22"
   }
 }
